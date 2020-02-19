@@ -24,9 +24,9 @@ async function fetchImage(url, callback, headers, abort) {
   callback(blob);
 }
 
-L.TileLayer.WMSHeader = L.TileLayer.WMS.extend({
+L.TileLayerWithHeaders = L.TileLayer.extend({
   initialize: function (url, options, headers, abort) {
-    L.TileLayer.WMS.prototype.initialize.call(this, url, options);
+    L.TileLayer.prototype.initialize.call(this, url, options);
     this.headers = headers;
     this.abort = abort;
   },
@@ -52,6 +52,6 @@ L.TileLayer.WMSHeader = L.TileLayer.WMS.extend({
   }
 });
 
-L.TileLayer.wmsHeader = function (url, options, headers, abort) {
-  return new L.TileLayer.WMSHeader(url, options, headers, abort);
+L.tileLayer = function (url, options, headers, abort) {
+  return new L.TileLayerWithHeaders(url, options, headers, abort);
 };
