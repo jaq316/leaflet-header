@@ -1,9 +1,11 @@
-'use strict';
+"use strict";
+
+import { DomEvent, Util } from "leaflet";
 
 async function fetchImage(url, callback, headers, abort) {
   let _headers = {};
   if (headers) {
-    headers.forEach(h => {
+    headers.forEach((h) => {
       _headers[h.header] = h.value;
     });
   }
@@ -18,7 +20,7 @@ async function fetchImage(url, callback, headers, abort) {
     method: "GET",
     headers: _headers,
     mode: "cors",
-    signal: signal
+    signal: signal,
   });
   const blob = await f.blob();
   callback(blob);
@@ -32,24 +34,28 @@ L.TileLayerWithHeaders = L.TileLayer.extend({
   },
   createTile(coords, done) {
     const url = this.getTileUrl(coords);
-    const img = document.createElement("img");
-    img.setAttribute("role", "presentation");
+    const tile = document.createElement("img");
+
+    DomEvent.on(tile, "load", Util.bind(this._tileOnLoad, this, done, tile));
+    DomEvent.on(tile, "error", Util.bind(this._tileOnError, this, done, tile));
+
+    tile.setAttribute("role", "presentation");
 
     fetchImage(
       url,
-      resp => {
+      (resp) => {
         const reader = new FileReader();
         reader.onload = () => {
-          img.src = reader.result;
+          tile.src = reader.result;
         };
         reader.readAsDataURL(resp);
-        done(null, img);
+        done(null, tile);
       },
       this.headers,
       this.abort
     );
-    return img;
-  }
+    return tile;
+  },
 });
 
 L.tileLayer = function (url, options, headers, abort) {
